@@ -1,0 +1,82 @@
+esphome:
+  name: esp32-c3-gauge
+  friendly_name: ESP32-C3-Gauge
+  board: esp32-c3-devkitm-1
+  platform: ESP32
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "ESP32-C3-Gauge Fallback"
+    password: "backup123"
+
+logger:
+
+api:
+  encryption:
+    key: "lxETubxQ14a51dnMBCWvpFRJ5Ilswsv21MpEk9zAfCM="
+
+ota:
+  - platform: esphome
+    password: "439b3e036c6b235c7362e925fd92feb7"
+
+# Home Assistant 滑动条控制，每个 GPIO 都有独立的滑动条
+number:
+  - platform: homeassistant
+    entity_id: input_number.voltage_control_gpio1
+    id: ha_voltage_gpio1
+    on_value:
+      then:
+        - lambda: |-
+            float duty_cycle = x / 100.0;
+            id(pwm_output_gpio1).set_level(duty_cycle);
+
+  - platform: homeassistant
+    entity_id: input_number.voltage_control_gpio0
+    id: ha_voltage_gpio0
+    on_value:
+      then:
+        - lambda: |-
+            float duty_cycle = x / 100.0;
+            id(pwm_output_gpio0).set_level(duty_cycle);
+
+  - platform: homeassistant
+    entity_id: input_number.voltage_control_gpio5
+    id: ha_voltage_gpio5
+    on_value:
+      then:
+        - lambda: |-
+            float duty_cycle = x / 100.0;
+            id(pwm_output_gpio5).set_level(duty_cycle);
+
+  - platform: homeassistant
+    entity_id: input_number.voltage_control_gpio21
+    id: ha_voltage_gpio21
+    on_value:
+      then:
+        - lambda: |-
+            float duty_cycle = x / 100.0;
+            id(pwm_output_gpio21).set_level(duty_cycle);
+
+# 使用 LEDC（PWM）模拟 DAC 输出，每个 GPIO 作为独立 PWM 控制
+output:
+  - platform: ledc
+    pin: GPIO1
+    frequency: 5000Hz
+    id: pwm_output_gpio1
+
+  - platform: ledc
+    pin: GPIO0
+    frequency: 5000Hz
+    id: pwm_output_gpio0
+
+  - platform: ledc
+    pin: GPIO5 
+    frequency: 5000Hz
+    id: pwm_output_gpio5
+
+  - platform: ledc
+    pin: GPIO21
+    frequency: 5000Hz
+    id: pwm_output_gpio21
